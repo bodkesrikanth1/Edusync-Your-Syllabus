@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Welcome • Edusync{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="landing-hero">
+  <div class="landing-hero-inner">
+
+    <div class="landing-left">
+      <div class="chip">🎓 Education • E-Learning • Syllabus Smart Learning</div>
+
+      <h1 class="landing-title">
+        Edusync — Your <span class="grad">Syllabus-Based Learning Partner</span>
+      </h1>
+
+      <p class="landing-lead">
+        Paste your syllabus and instantly get <strong>unit-wise curated learning videos</strong>,
+        ranked by relevance, quality, and recency — so you learn faster with less searching.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="{{ url_for('register') }}">✨ Create account — Free</a>
+        <a class="btn btn-ghost" href="{{ url_for('login') }}">🔑 Login</a>
+      </div>
+
+      <div class="hero-mini">
+        <div class="mini-box">
+          <div class="mini-num" id="landingStat1">0</div>
+          <div class="mini-label">Unit Topics Parsed</div>
+        </div>
+        <div class="mini-box">
+          <div class="mini-num" id="landingStat2">0</div>
+          <div class="mini-label">Smart Recommendations</div>
+        </div>
+        <div class="mini-box">
+          <div class="mini-num" id="landingStat3">0%</div>
+          <div class="mini-label">Time Saved</div>
+        </div>
+      </div>
+
+      <ul class="landing-features">
+        <li>✅ Unit-wise recommendations mapped to your syllabus</li>
+        <li>✅ Filters: duration, difficulty, channel score</li>
+        <li>✅ Works with text from PDFs, Docs, and Notes</li>
+      </ul>
+    </div>
+
+    <div class="landing-right" aria-hidden="true">
+      <!-- Mock Dashboard Card -->
+      <div class="mock-ui">
+        <div class="mock-top">
+          <div class="pill strong">📘 Data Structures</div>
+          <div class="pill">5 Units</div>
+          <div class="pill muted">Top videos per unit</div>
+        </div>
+
+        <div class="mock-list">
+          <div class="mock-item">
+            <div class="mock-badge">UNIT I</div>
+            <div class="mock-text">
+              <strong>Arrays & Linked Lists</strong>
+              <div class="muted small">Stacks · Queues · Complexity</div>
+            </div>
+            <div class="mock-score">98%</div>
+          </div>
+
+          <div class="mock-item">
+            <div class="mock-badge">UNIT II</div>
+            <div class="mock-text">
+              <strong>Trees & BST</strong>
+              <div class="muted small">AVL · Heap · Traversals</div>
+            </div>
+            <div class="mock-score">95%</div>
+          </div>
+
+          <div class="mock-item">
+            <div class="mock-badge">UNIT III</div>
+            <div class="mock-text">
+              <strong>Graph Algorithms</strong>
+              <div class="muted small">BFS · DFS · Shortest Path</div>
+            </div>
+            <div class="mock-score">93%</div>
+          </div>
+        </div>
+
+        <div class="mock-footer">
+          <div class="mock-note">⚡ Generated in seconds</div>
+          <div class="mock-btn">View Results →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<section class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-item">📌 Syllabus → Topics</div>
+    <div class="trust-item">🧠 NLP Topic Extraction</div>
+    <div class="trust-item">🎥 YouTube Smart Ranking</div>
+    <div class="trust-item">📊 Clean Dashboard UI</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="container">
+    <h2 class="section-title">How it works</h2>
+    <p class="section-subtitle muted">
+      A simple 3-step process to convert your syllabus into a structured learning plan.
+    </p>
+
+    <div class="steps-grid">
+      <article class="step">
+        <div class="step-num">1</div>
+        <h3>Paste / Upload Syllabus</h3>
+        <p>Use UNIT I / UNIT II headings for best matching and accuracy.</p>
+      </article>
+
+      <article class="step">
+        <div class="step-num">2</div>
+        <h3>Topic Extraction</h3>
+        <p>We parse units and extract key topics + subtopics automatically.</p>
+      </article>
+
+      <article class="step">
+        <div class="step-num">3</div>
+        <h3>Ranked Learning Resources</h3>
+        <p>Get curated videos with relevance ranking and smart filters.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE GRID -->
+<section class="feature-section">
+  <div class="container">
+    <h2 class="section-title">Why students use Edusync</h2>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="f-ico">🎯</div>
+        <h3>Unit-wise Learning Flow</h3>
+        <p class="muted">Study exactly what your syllabus requires — no extra confusion.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-ico">⚡</div>
+        <h3>Fast Recommendations</h3>
+        <p class="muted">Instantly generate learning resources with a clean interface.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-ico">📚</div>
+        <h3>Works for Any Course</h3>
+        <p class="muted">CSE, ECE, IT, Mechanical, Civil — any syllabus format works.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-ico">🧠</div>
+        <h3>Smart Ranking</h3>
+        <p class="muted">Rank videos by relevance, quality signals, and recency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonial-section">
+  <div class="container">
+    <h2 class="section-title">What learners say</h2>
+
+    <div class="testimonial-grid">
+      <div class="test-card">
+        <p>“I pasted my syllabus and got all unit videos in seconds. It saved my exam prep time.”</p>
+        <div class="test-user">
+          <div class="avatar">A</div>
+          <div>
+            <strong>Arun</strong>
+            <div class="muted small">CSE Student</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <p>“Very clean UI and the recommendations are actually relevant to our university syllabus.”</p>
+        <div class="test-user">
+          <div class="avatar">P</div>
+          <div>
+            <strong>Priya</strong>
+            <div class="muted small">IT Student</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <p>“Perfect for faculty too. I can guide students with a structured learning resource list.”</p>
+        <div class="test-user">
+          <div class="avatar">R</div>
+          <div>
+            <strong>Rahul</strong>
+            <div class="muted small">Faculty</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <div>
+        <h2>Start learning smarter with Edusync 🚀</h2>
+        <p class="muted">Create your free account and generate syllabus-based recommendations instantly.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="{{ url_for('register') }}">Get Started</a>
+        <a class="btn btn-ghost" href="{{ url_for('login') }}">Login</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

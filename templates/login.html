@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Login • Edusync{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+
+  <div class="card auth-card card-glow">
+    <div class="auth-head">
+      <h2>Welcome Back 👋</h2>
+      <p class="muted">Login to continue learning with <strong>Edusync</strong></p>
+    </div>
+
+    <form method="post" action="{{ url_for('login') }}" class="form-stack">
+
+      <div class="input-group">
+        <label class="label-inline">Email Address</label>
+        <div class="input-icon">
+          <span class="icon">📧</span>
+          <input class="input input-pad" name="email" type="email" placeholder="example@gmail.com" required>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="label-inline">Password</label>
+        <div class="input-icon">
+          <span class="icon">🔒</span>
+          <input class="input input-pad" id="password" name="password" type="password" placeholder="Enter your password" required>
+          <button type="button" class="eye-btn" id="togglePassword" aria-label="Show password">👁</button>
+        </div>
+      </div>
+
+      <div class="auth-row">
+        <label class="check">
+          <input type="checkbox" name="remember">
+          <span>Remember me</span>
+        </label>
+
+        <a class="link" href="#" onclick="alert('Forgot password module can be added!')">Forgot password?</a>
+      </div>
+
+      <button class="btn btn-primary btn-full" type="submit">🚀 Login</button>
+
+      <div class="auth-divider">
+        <span>New to Edusync?</span>
+      </div>
+
+      <a class="btn btn-ghost btn-full" href="{{ url_for('register') }}">✨ Create an account</a>
+    </form>
+  </div>
+
+</section>
+{% endblock %}

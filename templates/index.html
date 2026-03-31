@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Dashboard • Edusync{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+
+  <section class="card card-glow">
+    <div class="card-head">
+      <h2>Upload / Paste Your Syllabus</h2>
+      <p class="muted">
+        Add your syllabus and generate unit-wise learning recommendations instantly.
+      </p>
+    </div>
+
+    <form method="post" action="{{ url_for('process') }}" class="form-stack" enctype="multipart/form-data">
+
+      <div class="form-grid">
+        <div>
+          <label class="label-inline">Course / Syllabus Title</label>
+          <input class="input" type="text" name="title" placeholder="e.g., Data Structures (CSE 3rd Sem)" required>
+        </div>
+
+        <div>
+          <label class="label-inline">Upload syllabus file (optional)</label>
+          <input class="input" type="file" name="syllabus_file" accept=".txt,.docx,.doc">
+          <div class="help-text">Supported: .txt, .docx (Convert .doc → .docx)</div>
+        </div>
+      </div>
+
+      <div class="or-divider">
+        <span>OR</span>
+      </div>
+
+      <label class="label-inline">Syllabus Text</label>
+      <textarea class="textarea" name="syllabus_text" rows="12"
+        placeholder="UNIT I: Arrays, Linked Lists, Stacks, Queues&#10;UNIT II: Trees, BSTs, Heaps..."></textarea>
+
+      <div class="form-row">
+        <button type="submit" class="btn btn-primary">
+          ⚡ Generate Recommendations
+        </button>
+        <a class="btn btn-ghost" href="{{ url_for('results', sid=0) }}">
+          🎯 View Sample Results
+        </a>
+      </div>
+    </form>
+
+    <details class="hint-box">
+      <summary>Tips for better matching</summary>
+      <ul>
+        <li>Use <strong>UNIT I / UNIT II</strong> format.</li>
+        <li>Keep syllabus clean with proper topic names.</li>
+        <li>Use text content inside docx (avoid images).</li>
+      </ul>
+    </details>
+  </section>
+
+  <aside class="card stats">
+    <h3>Quick actions</h3>
+    <ul class="quick-list">
+      <li><a href="{{ url_for('index') }}">➕ New Syllabus</a></li>
+      <li><a href="{{ url_for('results', sid=0) }}">📌 View Demo Results</a></li>
+      <li><a href="{{ url_for('logout') }}">🚪 Logout</a></li>
+    </ul>
+
+    <hr>
+
+    <h3>Your profile</h3>
+    {% if g.user %}
+      <div class="profile-box">
+        <div class="avatar">{{ g.user.full_name[0].upper() }}</div>
+        <div>
+          <p class="profile-name">{{ g.user.full_name }}</p>
+          <p class="muted small">{{ g.user.email }}</p>
+          <p class="muted small">{{ g.user.college or '' }} {{ g.user.department or '' }}</p>
+        </div>
+      </div>
+    {% else %}
+      <p class="muted">You are not logged in.</p>
+    {% endif %}
+
+    <div class="feature-box">
+      <h4>Edusync Features</h4>
+      <ul class="feature-list">
+        <li>✔ Syllabus-to-Topics Extraction</li>
+        <li>✔ Topic-wise YouTube Recommendations</li>
+        <li>✔ Personalized Learning Flow</li>
+        <li>✔ Modern Student-Friendly UI</li>
+      </ul>
+    </div>
+  </aside>
+
+</div>
+{% endblock %}

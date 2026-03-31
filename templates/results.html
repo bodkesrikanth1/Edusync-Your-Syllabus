@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Results • Edusync{% endblock %}
+
+{% block content %}
+
+<section class="card results-card card-glow">
+  <div class="results-head">
+    <div>
+      <h2 class="results-title">📌 Unit-wise Recommendations</h2>
+      <p class="muted">Click a unit to expand topics and view curated learning videos.</p>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="results-tools">
+
+      <div class="search-wrap">
+        <span class="search-ico">🔎</span>
+        <input id="topicSearch" class="input search-input" type="text"
+               placeholder="Search topic (e.g., Stack, BST, CNN, DBMS...)">
+      </div>
+
+      <form method="get" class="filters" aria-label="filters">
+        <div class="filter-item">
+          <label class="label-inline">Duration</label>
+          <select class="input select-clean" name="duration" onchange="this.form.submit()">
+            <option value="all" {{ 'selected' if not filters.duration }}>All</option>
+            <option value="short" {{ 'selected' if filters.duration=='short' }}>Short (&lt;4m)</option>
+            <option value="medium" {{ 'selected' if filters.duration=='medium' }}>Medium (4–20m)</option>
+            <option value="long" {{ 'selected' if filters.duration=='long' }}>Long (&gt;20m)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="label-inline">Difficulty</label>
+          <select class="input select-clean" name="difficulty" onchange="this.form.submit()">
+            <option value="all" {{ 'selected' if not filters.difficulty }}>All</option>
+            <option value="beginner" {{ 'selected' if filters.difficulty=='beginner' }}>Beginner</option>
+            <option value="intermediate" {{ 'selected' if filters.difficulty=='intermediate' }}>Intermediate</option>
+            <option value="advanced" {{ 'selected' if filters.difficulty=='advanced' }}>Advanced</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="label-inline">Min Score</label>
+          <input class="input" name="min_rating" type="number" step="0.1" min="0" max="1"
+                 placeholder="0.0–1.0"
+                 value="{{ filters.min_rating if filters.min_rating is not none else '' }}"
+                 onblur="this.form.submit()">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="results-summary">
+    <span class="pill strong">📚 Units: {{ units|length }}</span>
+    <span class="pill">🎥 Recommendations are ranked</span>
+    <span class="pill muted">Tip: Use search to filter topics instantly</span>
+  </div>
+</section>
+
+<!-- UNITS -->
+{% for u in units %}
+<section class="card unit-card">
+  <button class="unit-toggle" aria-expanded="false" onclick="toggleUnit(this)">
+    <div class="unit-left">
+      <div class="unit-title">
+        Unit {{ u.unit_no }}
+        <span class="muted">{{ u.unit_title or '' }}</span>
+      </div>
+      <div class="unit-meta muted">
+        {{ u.topics|length }} topics • Click to view videos
+      </div>
+    </div>
+
+    <div class="unit-right">
+      <span class="pill">📌 {{ u.topics|length }} Topics</span>
+      <svg class="chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </button>
+
+  <div class="unit-body" hidden>
+    {% for t in u.topics %}
+      <div class="topic-block" data-topic="{{ t.topic_text|lower }}">
+        <div class="topic-head">
+          <h3 class="topic-heading">📍 {{ t.topic_text }}</h3>
+          <span class="pill muted">Topic</span>
+        </div>
+
+        {% if t.videos %}
+          <div class="videos-grid">
+            {% for v in t.videos %}
+              <article class="video-card">
+                <a class="thumb" href="{{ v.url }}" target="_blank" rel="noopener">
+                  <img alt="{{ v.title }}" src="https://i.ytimg.com/vi/{{ v.youtube_id }}/hqdefault.jpg">
+                  <span class="play-badge">▶</span>
+                </a>
+
+                <div class="vmeta">
+                  <a class="vtitle" href="{{ v.url }}" target="_blank" rel="noopener">
+                    {{ v.title }}
+                  </a>
+
+                  <div class="vsub muted">{{ v.channel_title }}</div>
+
+                  <div class="vtags">
+                    <span class="tag">⏱ {{ (v.duration_sec//60) }}m</span>
+                    <span class="tag">👀 {{ "{:,}".format(v.view_count) }}</span>
+                    <span class="tag">⭐ {{ '%.2f' % v.final_score }}</span>
+                    <span class="tag">📚 {{ v.difficulty|capitalize }}</span>
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">No matches found for this topic with current filters.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<script>
+  // Expand first unit automatically
+  document.addEventListener('DOMContentLoaded', function(){
+    const first = document.querySelector('.unit-card .unit-toggle');
+    if(first) toggleUnit(first, true);
+
+    // Topic search filter
+    const input = document.getElementById("topicSearch");
+    if(input){
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll(".topic-block").forEach(block => {
+          const topic = block.getAttribute("data-topic") || "";
+          block.style.display = topic.includes(q) ? "block" : "none";
+        });
+      });
+    }
+  });
+</script>
+
+{% endblock %}

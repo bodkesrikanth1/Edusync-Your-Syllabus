@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>Admin Dashboard</h2>
+  <p class="muted">Overview of registered users</p>
+</section>
+
+<section class="card">
+  <div style="overflow-x:auto">
+    <table style="width:100%; border-collapse:collapse">
+      <thead>
+        <tr style="background:#f1f5f9">
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>College</th>
+          <th>Department</th>
+          <th>Year</th>
+          <th>Phone</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr style="border-bottom:1px solid #e5e7eb">
+          <td>{{ u.id }}</td>
+          <td>{{ u.full_name }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.role == 'admin' %}
+              <strong style="color:#7c3aed">Admin</strong>
+            {% else %}
+              Student
+            {% endif %}
+          </td>
+          <td>{{ u.college or '-' }}</td>
+          <td>{{ u.department or '-' }}</td>
+          <td>{{ u.year or '-' }}</td>
+          <td>{{ u.phone or '-' }}</td>
+          <td>{{ u.created_at.strftime('%d-%m-%Y') if u.created_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Register • Edusync{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+
+  <div class="card auth-card card-glow">
+    <div class="auth-head">
+      <h2>Create Your Edusync Account ✨</h2>
+      <p class="muted">
+        Student accounts are free. Register to save syllabi, manage units, and track learning.
+      </p>
+    </div>
+
+    <form method="post" action="{{ url_for('register') }}" class="form-stack" id="registerForm">
+
+      <!-- BASIC DETAILS -->
+      <div class="section-title">
+        <span>👤 Basic Details</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="label-inline">Full Name</label>
+          <div class="input-icon">
+            <span class="icon">🧑‍🎓</span>
+            <input class="input input-pad" type="text" name="full_name" placeholder="Enter your full name" required>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-inline">Email</label>
+          <div class="input-icon">
+            <span class="icon">📧</span>
+            <input class="input input-pad" type="email" name="email" placeholder="example@gmail.com" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="section-title">
+        <span>🔐 Security</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="label-inline">Password</label>
+          <div class="input-icon">
+            <span class="icon">🔒</span>
+            <input class="input input-pad" id="regPassword" type="password" name="password"
+                   placeholder="Create a strong password" required>
+            <button type="button" class="eye-btn" id="toggleRegPassword" aria-label="Show password">👁</button>
+          </div>
+          <div class="help-text" id="passHint">Use 8+ characters with letters & numbers.</div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-inline">Confirm Password</label>
+          <div class="input-icon">
+            <span class="icon">✅</span>
+            <input class="input input-pad" id="regConfirm" type="password" name="confirm"
+                   placeholder="Re-enter password" required>
+            <button type="button" class="eye-btn" id="toggleRegConfirm" aria-label="Show password">👁</button>
+          </div>
+          <div class="help-text" id="matchHint"></div>
+        </div>
+      </div>
+
+      <!-- ACADEMIC INFO -->
+      <div class="section-title">
+        <span>🏫 Academic Info</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="label-inline">Role</label>
+          <div class="input-icon">
+            <span class="icon">🎭</span>
+            <select class="input input-pad select-pad" name="role">
+              <option value="student" selected>Student</option>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-inline">College</label>
+          <div class="input-icon">
+            <span class="icon">🏛️</span>
+            <input class="input input-pad" name="college" type="text" placeholder="Your college name">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="label-inline">Department</label>
+          <div class="input-icon">
+            <span class="icon">📚</span>
+            <input class="input input-pad" name="department" type="text" placeholder="e.g., CSE / IT / ECE">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-inline">Year</label>
+          <div class="input-icon">
+            <span class="icon">📅</span>
+            <input class="input input-pad" name="year" placeholder="e.g., 3rd Year">
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRA DETAILS -->
+      <div class="section-title">
+        <span>🪪 Additional Details</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="label-inline">Enrollment No.</label>
+          <div class="input-icon">
+            <span class="icon">🆔</span>
+            <input class="input input-pad" name="enrollment_no" type="text" placeholder="Enter enrollment number">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-inline">Phone</label>
+          <div class="input-icon">
+            <span class="icon">📱</span>
+            <input class="input input-pad" name="phone" type="text" placeholder="Enter phone number">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <button class="btn btn-primary btn-full" type="submit" id="createBtn">✨ Create Account</button>
+        <a class="btn btn-ghost btn-full" href="{{ url_for('login') }}">Already have an account? Login</a>
+      </div>
+
+    </form>
+  </div>
+
+</section>
+{% endblock %}
