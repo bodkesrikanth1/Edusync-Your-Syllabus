@@ -289,5 +289,6 @@ def results(sid):
     units = fetch_units_topics_videos(sid, filters)
     return render_template("results.html", sid=sid, units=units, filters=filters)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# For local development only - not used in Vercel deployment
+# if __name__ == "__main__":
+#     app.run(debug=True)

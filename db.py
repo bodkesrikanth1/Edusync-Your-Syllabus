@@ -1,25 +1,25 @@
 import mysql.connector
-from mysql.connector import pooling
 from config import Config
-import mysql.connector
-from mysql.connector import pooling
-from config import Config
-from dateutil import parser as dtparser, tz  # <- add this import
+from dateutil import parser as dtparser, tz
 import json
-pool = pooling.MySQLConnectionPool(
-    pool_name="edusync_pool",
-    pool_size=10,   # increase pool size if you expect more parallel requests
-    pool_reset_session=True,
-    host=Config.DB_HOST,
-    user=Config.DB_USER,
-    password=Config.DB_PASSWORD,
-    database=Config.DB_NAME,
-    charset="utf8mb4",
-    collation="utf8mb4_unicode_ci"
-)
 
 def get_conn():
-    return pool.get_connection()
+    """Create a new database connection for each request (serverless-friendly)"""
+    try:
+        conn = mysql.connector.connect(
+            host=Config.DB_HOST,
+            user=Config.DB_USER,
+            password=Config.DB_PASSWORD,
+            database=Config.DB_NAME,
+            charset="utf8mb4",
+            collation="utf8mb4_unicode_ci",
+            connect_timeout=10,
+            autocommit=True  # Enable autocommit for serverless
+        )
+        return conn
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+        raise
 
 def insert_syllabus(title, text):
     conn = get_conn()

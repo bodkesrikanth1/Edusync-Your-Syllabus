@@ -2,8 +2,24 @@ import math
 import requests
 from datetime import datetime, timezone
 from dateutil import parser as dtparser
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+
+# Lazy imports for sklearn to avoid slow imports in serverless
+_tfidf_vectorizer = None
+_cosine_similarity = None
+
+def _get_tfidf_vectorizer():
+    global _tfidf_vectorizer
+    if _tfidf_vectorizer is None:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        _tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+    return _tfidf_vectorizer
+
+def _get_cosine_similarity():
+    global _cosine_similarity
+    if _cosine_similarity is None:
+        from sklearn.metrics.pairwise import cosine_similarity
+        _cosine_similarity = cosine_similarity
+    return _cosine_similarity
 
 SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
@@ -94,9 +110,9 @@ def search_and_rank(api_key, query, max_results=12):
 
     # TF-IDF similarity between query and each video text
     corpus = [query] + [doc for _, doc in docs]
-    vec = TfidfVectorizer(stop_words='english', ngram_range=(1,2))
+    vec = _get_tfidf_vectorizer()
     X = vec.fit_transform(corpus)
-    sims = cosine_similarity(X[0:1], X[1:]).flatten()
+    sims = _get_cosine_similarity()(X[0:1], X[1:]).flatten()
 
     # Compute rating-like score using views + channel subs + recency
     rating = []

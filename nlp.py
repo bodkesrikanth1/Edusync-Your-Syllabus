@@ -1,7 +1,21 @@
 import re
 from typing import List, Dict
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Lazy import for sklearn to avoid slow imports in serverless
+_tfidf_vectorizer = None
+
+def _get_tfidf_vectorizer():
+    global _tfidf_vectorizer
+    if _tfidf_vectorizer is None:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        _tfidf_vectorizer = TfidfVectorizer(
+            stop_words='english',
+            token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z0-9\-]{2,}\b",
+            max_features=1000,
+            ngram_range=(1, 2)
+        )
+    return _tfidf_vectorizer
 
 UNIT_PATTERNS = [
     r'(?:^|\n)\s*(?:UNIT|Unit|Module|MODULE)\s*[-:]?\s*(\w+)\s*(.*)',
@@ -70,12 +84,7 @@ def top_topics(text: str, k: int = 6) -> List[tuple]:
         return []
 
     try:
-        vec = TfidfVectorizer(
-            ngram_range=(1, 2),
-            token_pattern=TOKEN_PATTERN,
-            stop_words=BASIC_STOPS,   # lighter stoplist
-            min_df=1
-        )
+        vec = _get_tfidf_vectorizer()
         X = vec.fit_transform([cleaned])
         if X.shape[1] == 0:
             raise ValueError("empty vocabulary")
