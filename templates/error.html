@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Error {{ code }} - Edusync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .error-container {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 30px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .error-code {
+      font-size: 72px;
+      font-weight: 800;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .error-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 10px;
+    }
+    .error-message {
+      font-size: 16px;
+      color: #718096;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #764ba2;
+    }
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1a202c;
+    }
+    .btn-secondary:hover {
+      background: #cbd5e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-code">{{ code }}</div>
+    <h1 class="error-title">{{ error }}</h1>
+    <p class="error-message">
+      {% if code == 500 %}
+        We're sorry, but something went wrong on our end.
+        Our team has been notified and is working on a fix.
+      {% elif code == 404 %}
+        The page you're looking for doesn't exist.
+      {% else %}
+        An error occurred. Please try again.
+      {% endif %}
+    </p>
+    <div class="error-actions">
+      <a href="{{ url_for('landing') }}" class="btn btn-primary">Go to Home</a>
+      <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+    </div>
+  </div>
+</body>
+</html>

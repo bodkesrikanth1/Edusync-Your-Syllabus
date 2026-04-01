@@ -21,12 +21,21 @@ app.secret_key = Config.SECRET_KEY
 # Error handlers
 @app.errorhandler(500)
 def internal_error(error):
+    import traceback
     print(f"500 Internal Server Error: {error}")
-    return {"error": "Internal server error", "message": str(error)}, 500
+    print(traceback.format_exc())
+    return render_template('error.html', error="Internal Server Error", code=500), 500
 
 @app.errorhandler(404)
 def not_found(error):
-    return {"error": "Not found"}, 404
+    return render_template('error.html', error="Page Not Found", code=404), 404
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    import traceback
+    print(f"Unhandled exception: {error}")
+    print(traceback.format_exc())
+    return render_template('error.html', error="Application Error", code=500), 500
 
 # ---------- Helpers ----------
 def login_required(view):
@@ -39,16 +48,24 @@ def login_required(view):
 
 @app.before_request
 def load_logged_in_user():
-    user_id = session.get('user_id')
-    if user_id is None:
-        g.user = None
-    else:
-        try:
-            g.user = get_user_by_id(user_id)
-        except Exception as e:
-            print(f"Error loading user {user_id}: {e}")
+    """Load authenticated user into g object for every request."""
+    try:
+        user_id = session.get('user_id')
+        if user_id is None:
             g.user = None
-            session.clear()
+        else:
+            try:
+                g.user = get_user_by_id(user_id)
+                if g.user is None:
+                    # User was deleted from database
+                    session.clear()
+            except Exception as e:
+                print(f"Error loading user {user_id}: {e}")
+                g.user = None
+                session.clear()
+    except Exception as e:
+        print(f"before_request error: {e}")
+        g.user = None
 
 def allowed_file(filename: str):
     if not filename:
@@ -112,7 +129,24 @@ def extract_text_from_upload(file_storage) -> (str, str):
 # ---------- Public landing & auth routes ----------
 @app.route('/', methods=['GET'])
 def landing():
-    return render_template('landing.html')
+    """Landing page - public route."""
+    try:
+        return render_template('landing.html')
+    except Exception as e:
+        print(f"Landing page error: {e}")
+        return render_template('error.html', error="Unable to load landing page", code=500), 500
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint for monitoring."""
+    try:
+        # Try to get a database connection to verify it's working
+        conn = get_conn()
+        conn.close()
+        return {'status': 'healthy', 'database': 'ok'}, 200
+    except Exception as e:
+        print(f"Health check failed: {e}")
+        return {'status': 'unhealthy', 'database': 'error', 'error': str(e)}, 503
 
 @app.route('/register', methods=['GET','POST'])
 def register():

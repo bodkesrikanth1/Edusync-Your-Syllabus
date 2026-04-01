@@ -2,10 +2,20 @@ import mysql.connector
 from config import Config
 from dateutil import parser as dtparser, tz
 import json
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_conn():
-    """Create a new database connection for each request (serverless-friendly)"""
+    """Create a new database connection for each request (serverless-friendly)
+    
+    Raises:
+        mysql.connector.Error: If connection fails
+    """
     try:
+        logger.info(f"Connecting to {Config.DB_HOST}:{Config.DB_NAME}")
         conn = mysql.connector.connect(
             host=Config.DB_HOST,
             user=Config.DB_USER,
@@ -14,11 +24,15 @@ def get_conn():
             charset="utf8mb4",
             collation="utf8mb4_unicode_ci",
             connect_timeout=10,
-            autocommit=True  # Enable autocommit for serverless
+            autocommit=False  # Changed to False for proper transaction handling
         )
+        logger.info("Database connection successful")
         return conn
+    except mysql.connector.Error as e:
+        logger.error(f"Database connection failed: {e.msg if hasattr(e, 'msg') else str(e)}")
+        raise
     except Exception as e:
-        print(f"Database connection failed: {e}")
+        logger.error(f"Unexpected database error: {str(e)}")
         raise
 
 def insert_syllabus(title, text):
