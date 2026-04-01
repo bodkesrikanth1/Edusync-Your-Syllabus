@@ -235,23 +235,18 @@ def admin_required(view):
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        try:
-            username = request.form.get('username','')
-            password = request.form.get('password','')
+        username = request.form.get('username','')
+        password = request.form.get('password','')
 
-            user = get_user_by_email(username)
+        user = get_user_by_email(username)
 
-            if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
-                session.clear()
-                session['user_id'] = user['id']
-                return redirect(url_for('admin_dashboard'))
+        if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
+            session.clear()
+            session['user_id'] = user['id']
+            return redirect(url_for('admin_dashboard'))
 
-            flash("Invalid admin credentials.", "error")
-            return redirect(url_for('admin_login'))
-        except Exception as e:
-            print(f"Admin login error: {e}")
-            flash("Admin login failed due to server error.", "error")
-            return redirect(url_for('admin_login'))
+        flash("Invalid admin credentials.", "error")
+        return redirect(url_for('admin_login'))
 
     return render_template('admin_login.html')
 
@@ -362,5 +357,5 @@ def results(sid):
         return redirect(url_for("index"))
 
 # For local development only - not used in Vercel deployment
-# if __name__ == "__main__":
-#     app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
