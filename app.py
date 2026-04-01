@@ -18,6 +18,16 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 
+# Error handlers
+@app.errorhandler(500)
+def internal_error(error):
+    print(f"500 Internal Server Error: {error}")
+    return {"error": "Internal server error", "message": str(error)}, 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return {"error": "Not found"}, 404
+
 # ---------- Helpers ----------
 def login_required(view):
     @functools.wraps(view)
@@ -33,7 +43,12 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = get_user_by_id(user_id)
+        try:
+            g.user = get_user_by_id(user_id)
+        except Exception as e:
+            print(f"Error loading user {user_id}: {e}")
+            g.user = None
+            session.clear()
 
 def allowed_file(filename: str):
     if not filename:
@@ -102,30 +117,30 @@ def landing():
 @app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == 'POST':
-        full_name = request.form.get('full_name','').strip()
-        email = request.form.get('email','').strip().lower()
-        password = request.form.get('password','')
-        confirm = request.form.get('confirm','')
-        role = request.form.get('role','student')
-        college = request.form.get('college','').strip() or None
-        department = request.form.get('department','').strip() or None
-        year = request.form.get('year','').strip() or None
-        enrollment_no = request.form.get('enrollment_no','').strip() or None
-        phone = request.form.get('phone','').strip() or None
-
-        if not full_name or not email or not password:
-            flash('Full name, email and password are required.', 'error')
-            return redirect(url_for('register'))
-        if password != confirm:
-            flash('Passwords do not match.', 'error')
-            return redirect(url_for('register'))
-
-        if get_user_by_email(email):
-            flash('An account with this email already exists.', 'error')
-            return redirect(url_for('register'))
-
-        pw_hash = generate_password_hash(password)
         try:
+            full_name = request.form.get('full_name','').strip()
+            email = request.form.get('email','').strip().lower()
+            password = request.form.get('password','')
+            confirm = request.form.get('confirm','')
+            role = request.form.get('role','student')
+            college = request.form.get('college','').strip() or None
+            department = request.form.get('department','').strip() or None
+            year = request.form.get('year','').strip() or None
+            enrollment_no = request.form.get('enrollment_no','').strip() or None
+            phone = request.form.get('phone','').strip() or None
+
+            if not full_name or not email or not password:
+                flash('Full name, email and password are required.', 'error')
+                return redirect(url_for('register'))
+            if password != confirm:
+                flash('Passwords do not match.', 'error')
+                return redirect(url_for('register'))
+
+            if get_user_by_email(email):
+                flash('An account with this email already exists.', 'error')
+                return redirect(url_for('register'))
+
+            pw_hash = generate_password_hash(password)
             user_id = create_user(full_name, email, pw_hash, role, college, department, year, enrollment_no, phone, None)
             session['user_id'] = user_id
             flash('Registration successful. You are now logged in.', 'success')
@@ -140,17 +155,22 @@ def register():
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email','').strip().lower()
-        password = request.form.get('password','')
-        user = get_user_by_email(email)
-        if user is None or not check_password_hash(user['password_hash'], password):
-            flash('Incorrect email or password.', 'error')
+        try:
+            email = request.form.get('email','').strip().lower()
+            password = request.form.get('password','')
+            user = get_user_by_email(email)
+            if user is None or not check_password_hash(user['password_hash'], password):
+                flash('Incorrect email or password.', 'error')
+                return redirect(url_for('login'))
+            session.clear()
+            session['user_id'] = user['id']
+            flash('Logged in successfully.', 'success')
+            next_page = request.args.get('next') or url_for('index')
+            return redirect(next_page)
+        except Exception as e:
+            print(f"Login error: {e}")
+            flash('Login failed due to server error.', 'error')
             return redirect(url_for('login'))
-        session.clear()
-        session['user_id'] = user['id']
-        flash('Logged in successfully.', 'success')
-        next_page = request.args.get('next') or url_for('index')
-        return redirect(next_page)
     return render_template('login.html')
 
 @app.route('/logout')
@@ -181,19 +201,23 @@ def admin_required(view):
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        username = request.form.get('username','')
-        password = request.form.get('password','')
+        try:
+            username = request.form.get('username','')
+            password = request.form.get('password','')
 
-        user = get_user_by_email(username)
+            user = get_user_by_email(username)
 
-        if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
-            session.clear()
-            session['user_id'] = user['id']
-            return redirect(url_for('admin_dashboard'))
+            if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
+                session.clear()
+                session['user_id'] = user['id']
+                return redirect(url_for('admin_dashboard'))
 
-
-        flash("Invalid admin credentials.", "error")
-        return redirect(url_for('admin_login'))
+            flash("Invalid admin credentials.", "error")
+            return redirect(url_for('admin_login'))
+        except Exception as e:
+            print(f"Admin login error: {e}")
+            flash("Admin login failed due to server error.", "error")
+            return redirect(url_for('admin_login'))
 
     return render_template('admin_login.html')
 
@@ -213,81 +237,95 @@ def process():
     - or plain text in 'syllabus_text' textarea
     Priority: file upload (if provided and valid) -> textarea -> error
     """
-    title = request.form.get("title", "My Syllabus")
-    syllabus_text = (request.form.get("syllabus_text") or "").strip()
+    try:
+        title = request.form.get("title", "My Syllabus")
+        syllabus_text = (request.form.get("syllabus_text") or "").strip()
 
-    # File upload handling
-    file = request.files.get("syllabus_file")
-    uploaded_text = ""
-    upload_type = "none"
-    if file and file.filename:
-        if not allowed_file(file.filename):
-            flash("Unsupported file type. Please upload .txt or .docx (or convert .doc to .docx).", "error")
-            return redirect(url_for("index"))
-        try:
-            uploaded_text, upload_type = extract_text_from_upload(file)
-        except ValueError as ve:
-            flash(str(ve), "error")
-            return redirect(url_for("index"))
-        except Exception as e:
-            print("Upload parsing error:", e)
-            flash("Failed to parse uploaded file. Try .txt or .docx formats.", "error")
-            return redirect(url_for("index"))
-
-        if upload_type == "doc":
-            flash("Legacy .doc files are not supported. Please save as .docx or .txt and upload again.", "error")
-            return redirect(url_for("index"))
-
-        if not uploaded_text:
-            flash("Uploaded file seemed empty or unparsable. Please check the file and try again.", "error")
-            return redirect(url_for("index"))
-
-    # Final syllabus source selection
-    final_text = uploaded_text if uploaded_text else syllabus_text
-    if not final_text:
-        flash("Please paste syllabus text or upload a .txt / .docx file.", "error")
-        return redirect(url_for("index"))
-
-    # Persist syllabus
-    sid = insert_syllabus(title, final_text)
-
-    # NLP: extract units->topics (function already robust)
-    units = extract_topics_per_unit(final_text, topics_per_unit=6)
-    if not units:
-        flash("Could not extract any units/topics from your syllabus. Please add more details and try again.", "error")
-        return redirect(url_for("index"))
-
-    # For each unit/topic -> query youtube and store
-    for u in units:
-        unit_id = insert_unit(sid, u["unit_no"], u.get("unit_title"))
-        if not u.get("topics"):
-            u["topics"] = [{"text": "overview", "weight": 1.0}]
-        for t in u["topics"]:
-            topic_id = insert_topic(unit_id, t["text"], t["weight"])
-            query = f"{t['text']} lecture tutorial"
+        # File upload handling
+        file = request.files.get("syllabus_file")
+        uploaded_text = ""
+        upload_type = "none"
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                flash("Unsupported file type. Please upload .txt or .docx (or convert .doc to .docx).", "error")
+                return redirect(url_for("index"))
             try:
-                results = search_and_rank(Config.YT_API_KEY, query, max_results=12)
-                for r in results[:12]:
-                    insert_video(topic_id, r)
+                uploaded_text, upload_type = extract_text_from_upload(file)
+            except ValueError as ve:
+                flash(str(ve), "error")
+                return redirect(url_for("index"))
             except Exception as e:
-                # logged but don't break
-                print("YouTube API error (ignored):", e)
+                print("Upload parsing error:", e)
+                flash("Failed to parse uploaded file. Try .txt or .docx formats.", "error")
+                return redirect(url_for("index"))
 
-    return redirect(url_for("results", sid=sid))
+            if upload_type == "doc":
+                flash("Legacy .doc files are not supported. Please save as .docx or .txt and upload again.", "error")
+                return redirect(url_for("index"))
+
+            if not uploaded_text:
+                flash("Uploaded file seemed empty or unparsable. Please check the file and try again.", "error")
+                return redirect(url_for("index"))
+
+        # Final syllabus source selection
+        final_text = uploaded_text if uploaded_text else syllabus_text
+        if not final_text:
+            flash("Please paste syllabus text or upload a .txt / .docx file.", "error")
+            return redirect(url_for("index"))
+
+        # Persist syllabus
+        sid = insert_syllabus(title, final_text)
+
+        # NLP: extract units->topics (function already robust)
+        units = extract_topics_per_unit(final_text, topics_per_unit=6)
+        if not units:
+            flash("Could not extract any units/topics from your syllabus. Please add more details and try again.", "error")
+            return redirect(url_for("index"))
+
+        # For each unit/topic -> query youtube and store
+        for u in units:
+            try:
+                unit_id = insert_unit(sid, u["unit_no"], u.get("unit_title"))
+                if not u.get("topics"):
+                    u["topics"] = [{"text": "overview", "weight": 1.0}]
+                for t in u["topics"]:
+                    topic_id = insert_topic(unit_id, t["text"], t["weight"])
+                    query = f"{t['text']} lecture tutorial"
+                    try:
+                        results = search_and_rank(Config.YT_API_KEY, query, max_results=12)
+                        for r in results[:12]:
+                            insert_video(topic_id, r)
+                    except Exception as e:
+                        # logged but don't break
+                        print("YouTube API error (ignored):", e)
+            except Exception as e:
+                print(f"Error processing unit {u.get('unit_no')}: {e}")
+                continue
+
+        return redirect(url_for("results", sid=sid))
+    except Exception as e:
+        print(f"Process error: {e}")
+        flash("Processing failed due to server error. Please try again.", "error")
+        return redirect(url_for("index"))
 
 @app.route("/results/<int:sid>", methods=["GET"])
 @login_required
 def results(sid):
-    duration = request.args.get("duration", "all")
-    difficulty = request.args.get("difficulty", "all")
-    min_rating = request.args.get("min_rating", None)
-    filters = {
-        "duration": duration if duration in ("short","medium","long") else None,
-        "difficulty": difficulty if difficulty in ("beginner","intermediate","advanced") else None,
-        "min_rating": float(min_rating) if min_rating else None
-    }
-    units = fetch_units_topics_videos(sid, filters)
-    return render_template("results.html", sid=sid, units=units, filters=filters)
+    try:
+        duration = request.args.get("duration", "all")
+        difficulty = request.args.get("difficulty", "all")
+        min_rating = request.args.get("min_rating", None)
+        filters = {
+            "duration": duration if duration in ("short","medium","long") else None,
+            "difficulty": difficulty if difficulty in ("beginner","intermediate","advanced") else None,
+            "min_rating": float(min_rating) if min_rating else None
+        }
+        units = fetch_units_topics_videos(sid, filters)
+        return render_template("results.html", sid=sid, units=units, filters=filters)
+    except Exception as e:
+        print(f"Results error: {e}")
+        flash("Failed to load results. Please try again.", "error")
+        return redirect(url_for("index"))
 
 # For local development only - not used in Vercel deployment
 # if __name__ == "__main__":
