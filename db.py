@@ -15,6 +15,7 @@ def get_conn():
         mysql.connector.Error: If connection fails
     """
     try:
+        print(f"DEBUG: Connecting to {Config.DB_HOST}:{Config.DB_NAME}")
         logger.info(f"Connecting to {Config.DB_HOST}:{Config.DB_NAME}")
         conn = mysql.connector.connect(
             host=Config.DB_HOST,
@@ -24,14 +25,18 @@ def get_conn():
             charset="utf8mb4",
             collation="utf8mb4_unicode_ci",
             connect_timeout=10,
-            autocommit=False  # Changed to False for proper transaction handling
+            autocommit=False,
+            ssl_disabled=False  # Enable SSL for secure connections
         )
+        print("DEBUG: Database connection successful")
         logger.info("Database connection successful")
         return conn
     except mysql.connector.Error as e:
+        print(f"DEBUG: Database connection failed: {e}")
         logger.error(f"Database connection failed: {e.msg if hasattr(e, 'msg') else str(e)}")
         raise
     except Exception as e:
+        print(f"DEBUG: Unexpected database error: {str(e)}")
         logger.error(f"Unexpected database error: {str(e)}")
         raise
 
@@ -171,11 +176,14 @@ def create_user(full_name: str, email: str, password_hash: str,
         conn.close()
 
 def get_user_by_email(email: str):
+    print(f"DEBUG: get_user_by_email called with: {email}")
     conn = get_conn()
     try:
         cur = conn.cursor(dictionary=True)
         cur.execute("SELECT * FROM users WHERE email=%s", (email,))
-        return cur.fetchone()
+        user = cur.fetchone()
+        print(f"DEBUG: get_user_by_email result: {user is not None}")
+        return user
     finally:
         cur.close()
         conn.close()

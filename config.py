@@ -12,6 +12,7 @@ class Config:
     DB_USER = os.getenv("DB_USER", "root")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "")
     DB_NAME = os.getenv("DB_NAME", "edusync")
+    print(f"DEBUG Config: DB_HOST={DB_HOST}, DB_USER={DB_USER}, DB_NAME={DB_NAME}")
     
     # YouTube API key
     YT_API_KEY = os.getenv("YT_API_KEY", "")

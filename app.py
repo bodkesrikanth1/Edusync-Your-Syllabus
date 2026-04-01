@@ -4,7 +4,7 @@ import functools
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g
 from config import Config
 from db import insert_syllabus, insert_unit, insert_topic, insert_video, fetch_units_topics_videos
-from db import create_user, get_user_by_email, get_user_by_id
+from db import create_user, get_user_by_email, get_user_by_id, get_conn
 from nlp import extract_topics_per_unit
 from youtube_api import search_and_rank
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -192,12 +192,16 @@ def login():
         try:
             email = request.form.get('email','').strip().lower()
             password = request.form.get('password','')
+            print(f"DEBUG: Login attempt for email: {email}")
             user = get_user_by_email(email)
+            print(f"DEBUG: User found: {user is not None}")
             if user is None or not check_password_hash(user['password_hash'], password):
+                print(f"DEBUG: Password check failed for user: {user}")
                 flash('Incorrect email or password.', 'error')
                 return redirect(url_for('login'))
             session.clear()
             session['user_id'] = user['id']
+            print(f"DEBUG: Login successful for user: {user['id']}")
             flash('Logged in successfully.', 'success')
             next_page = request.args.get('next') or url_for('index')
             return redirect(next_page)
